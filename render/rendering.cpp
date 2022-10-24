@@ -1,11 +1,9 @@
 #include<vector>
 #include<memory>
 
-#include"glad/glad.h"
-#include"glfw/glfw3.h"
-
 #include "kmath.h"
 
+#include "window_system.h"
 #include "triangle.h"
 #include "trianglelist.h"
 #include "vertexdata.h"
@@ -15,27 +13,14 @@
 
 using namespace krender::math;
 
-const int kWindowWeight = 1600;
-const int kWindowHeight =  900;
 int main(){
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
-
-	GLFWwindow* window = glfwCreateWindow(kWindowWeight, kWindowHeight, "opengl", nullptr, nullptr);
-	if (window == nullptr){
-		glfwTerminate();
+	
+	std::shared_ptr<krender::window_system> window = std::make_shared<krender::window_system>();
+	if(window->initWindow() != krender::WINDOW_ERROR_CODE::NO_ERROR){
 		return -1;
 	}
-	glfwMakeContextCurrent(window);
-
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
-		return -1;
-	}
-
 	//Test
-	std::shared_ptr<krender::FrameBuffer> colorbuffer = std::make_shared<krender::FrameBuffer>(kWindowWeight, kWindowHeight);
+	std::shared_ptr<krender::FrameBuffer> colorbuffer = std::make_shared<krender::FrameBuffer>(krender::window_system::getWindowWidth(), krender::window_system::getWindowHeight());
 	//std::shared_ptr<krender::FrameBuffer> colorbufferSecond = std::make_shared<krender::FrameBuffer>(kWindowWeight, kWindowHeight);
 	
 	
@@ -82,8 +67,8 @@ int main(){
 	
 	//Test
 
-	while (!glfwWindowShouldClose(window)) {
-		float time = glfwGetTime();
+	while (!window->shouldClose()) {
+		float time = window->getCurrentTime();
 		float angle = time *  3.14159f / 180.f * 10.f;
 		krender::math::mat4 roatoa_model(cos(angle), -sin(angle), 0, 0,
 								  sin(angle),  cos(angle), 0, 0,
@@ -109,16 +94,16 @@ int main(){
 		pipeline->PipelineClear();
 
 		pipeline->Rendering();
-		glDrawPixels(kWindowWeight, kWindowHeight, GL_RGBA, GL_UNSIGNED_BYTE, colorbuffer->framebuffer_.data());
+		glDrawPixels(krender::window_system::getWindowWidth(), krender::window_system::getWindowHeight(), GL_RGBA, GL_UNSIGNED_BYTE, colorbuffer->framebuffer_.data());
 
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+		window->windowSwapBuffer();
+		window->pollEvent();
 	}
+	//这里渲染结果被拉长是因为长和宽的比例不是一比一所以被拉长。可能需要设置摄像机或窗口使他比例协调。
 	pipeline->PipelineClear();
 	delete raster;
 	delete vertexdata_set;
 	delete pipeline;
 	delete simpleshader;
-	glfwTerminate();
 	return 0;
 }
