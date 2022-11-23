@@ -1,6 +1,8 @@
 file(GLOB_RECURSE HEADER_NAME "*.h")
 file(GLOB_RECURSE SOURCE_NAME "*.cpp")
 
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${HEADER_NAME} ${SOURCE_NAME})
+
 add_executable(${PROJECT_NAME} ${HEADER_NAME} ${SOURCE_NAME})
 target_link_libraries(${PROJECT_NAME} PRIVATE thirdPart)
 

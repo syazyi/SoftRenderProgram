@@ -1,6 +1,6 @@
 #include "trianglestrategy.h"
 
-void krender::TriangleStrategy::Draw(VertexDataSet& vertexlist, VertexDataSet& viewvedrtex, FrameBuffer* pframebuffer, Shader* shader){
+void krender::TriangleStrategy::Draw(VertexDataSet& vertexlist, VertexDataSet& viewvertex, FrameBuffer* pframebuffer, Shader* shader){
     //这里仅仅只绘制了一个三角形，因此还要考虑多三角形的情况。
     for (int k = 0; k < vertexlist.triangleNums * 2; k += 3) {
         math::Vec4f vertex1 = vertexlist.vertex[vertexlist.vertex_index[k] - 1].position;
@@ -13,13 +13,26 @@ void krender::TriangleStrategy::Draw(VertexDataSet& vertexlist, VertexDataSet& v
         int left = std::min(vertex1.x, std::min(vertex2.x, vertex3.x));
         for (int i = bottom; i <= upper; i++) {
             for (int j = left; j <= right; j++) {
-                float x = j + 0.5;
-                float y = i + 0.5;
-                std::array<math::Vec4f, 3> triangle = {vertex1, vertex2, vertex3};
-                if (InsideTriangle(x, y, triangle)) {
-                    math::ColorVec4 color = shader->FragmentShader(vertexlist, viewvedrtex);
-                    pframebuffer->FrameBufferSetPixel(x, y, color);
+                   float x = j + 0.5;
+                   float y = i + 0.5;
+                   
+                   std::array<math::Vec4f, 3> triangle = {vertex1, vertex2, vertex3};
+                   if (InsideTriangle(x, y, triangle)) {
+                       math::ColorVec4 color = shader->FragmentShader(vertexlist, viewvertex);
+                       pframebuffer->FrameBufferSetPixel(x, y, color);
+                   }
+                /*math::ColorVec4 color;
+                std::array<math::Vec4f, 3> triangle = { vertex1, vertex2, vertex3 };
+                float msaaWeight[2] = { 0.25, 0.75 };
+                for (int m = 0; m < 2; m++) {
+                    for (int n = 0; n < 2; n++) {
+                        if (InsideTriangle(j + msaaWeight[m], i + msaaWeight[n], triangle)) {
+                            color += shader->FragmentShader(vertexlist, viewvertex);
+                        }
+                    }
                 }
+                color /= 4;
+                pframebuffer->FrameBufferSetPixel(x, y, color);*/
             }
         }
     }

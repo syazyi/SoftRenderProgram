@@ -20,7 +20,9 @@ void krender::Pipeline::Rendering() {
 }
 void krender::Pipeline::Project(VertexDataSet& pvertexlist) {
     math::mat4 projectionmat(1.0f);
-
+    for (auto& a : pvertexlist.vertex) {
+        a.position *= projectionmat;
+    }
     //Put it in the vertex shader first
 }
 
