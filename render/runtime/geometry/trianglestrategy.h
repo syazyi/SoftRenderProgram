@@ -11,6 +11,6 @@ namespace krender
         virtual void Draw(VertexDataSet& vertexlist, VertexDataSet& viewvedrtex, FrameBuffer* pframebuffer, Shader* shader) override;
         bool InsideTriangle(float x, float y, std::array<math::Vec4f, 3> triangle);
         
-        std::pair<float, float> Interpolation(VertexDataSet& vertexlist, math::Vec3f& const point);
+        std::pair<float, float> Interpolation(const VertexDataSet& vertexlist, const math::Vec3f& point);
     };
 } // namespace krender

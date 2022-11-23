@@ -8,7 +8,7 @@ namespace krender
     class RasterizeStrategy{
     public:
         virtual void Draw(VertexDataSet& vertexlist, VertexDataSet& viewvedrtex, FrameBuffer* pframebuffer, Shader* shader) = 0;
-        virtual std::pair<float, float> Interpolation(VertexDataSet& vertexlist, math::Vec3f& const point) = 0;
+        virtual std::pair<float, float> Interpolation(const VertexDataSet& vertexlist, const math::Vec3f& point) = 0;
         virtual ~RasterizeStrategy(){}
     };
 } // namespace krender

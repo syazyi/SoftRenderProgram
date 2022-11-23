@@ -49,7 +49,7 @@ bool krender::TriangleStrategy::InsideTriangle(float x, float y, std::array<math
     return (Cross(a, d).z < 0 && Cross(b, e).z < 0 && Cross(c, f).z < 0);
 }
 
-std::pair<float, float> krender::TriangleStrategy::Interpolation(VertexDataSet& const vertexlist, math::Vec3f& const point){
+std::pair<float, float> krender::TriangleStrategy::Interpolation(const VertexDataSet& vertexlist, const math::Vec3f& point){
     float alpha = 0;
     float beta = 1;
     math::Vec3f a;
