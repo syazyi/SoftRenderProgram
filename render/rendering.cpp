@@ -10,6 +10,7 @@
 #include "pipeline.h"
 #include"framebuffer.h"
 #include "trianglestrategy.h"
+#include "timer.h"
 
 using namespace krender::math;
 
@@ -22,13 +23,24 @@ int main(){
 	//Test
 	std::shared_ptr<krender::FrameBuffer> colorbuffer = std::make_shared<krender::FrameBuffer>(krender::window_system::getWindowWidth(), krender::window_system::getWindowHeight());
 	//std::shared_ptr<krender::FrameBuffer> colorbufferSecond = std::make_shared<krender::FrameBuffer>(kWindowWeight, kWindowHeight);
-	
-	
-	Vec3f a(0.0f, 0.1f, 0);
-	Vec3f b(0.1f, 0.0f, 0);
-	Vec3f c(-0.1f, 0.0f, 0);
 
-	Vec3f a1(0.0f, -0.1f, 0);
+	/*mat4 Testmat(
+		2.f, 3.f, 8.f, 0.f,
+		6.f, 0.f, -3.f, 0.f,
+		-1.f, 3.f, 2.f, 0.f,
+		0.f, 0.f, 0.f, 1.f
+	);*/
+
+	mat4 testmat(1.0f);
+	Vec4f testvec(1.5f, 6.5f, 7.5f, 1.0f);
+
+	testvec *= testmat;
+
+	Vec3f a(0.0f, 0.5f, 0);
+	Vec3f b(0.5f, 0.0f, 0);
+	Vec3f c(-0.5f, 0.0f, 0);
+	 
+	Vec3f a1(0.0f, -0.5f, 0);
 
 	ColorVec4 a_color(255, 0, 0);
 	ColorVec4 b_color(0, 255, 0);
@@ -63,11 +75,13 @@ int main(){
 	krender::Shader* simpleshader = new krender::SimpleNDCShader;
 
 
-	krender::Pipeline* pipeline = new krender::Pipeline(colorbuffer, simpleshader, vertexdata_set, raster);
+	krender::Pipeline* pipeline = new krender::Pipeline(colorbuffer, vertexdata_set, simpleshader, raster);
 	
 	//Test
+	krender::Timer timer;
 
 	while (!window->shouldClose()) {
+		timer.CaculateDeltaTime();
 		float time = window->getCurrentTime();
 		float angle = time *  3.14159f / 180.f * 10.f;
 		krender::math::mat4 roatoa_model(cos(angle), -sin(angle), 0, 0,
@@ -88,7 +102,7 @@ int main(){
 		krender::math::Vec3f lux = Cross(lookat, up);
 		krender::math::mat4 viewmat4(lux.x, lux.y, lux.z, 0, 
 									 up.x, up.y, up.z, 0, 
-									 -lookat.x, -lookat.y, -lookat.z, 0,
+									 -lookat.x, -lookat.y, -lookat.z, 1.f,
 									 0, 0, 0, 1);
 		simpleshader->SetView(viewmat4);
 		pipeline->PipelineClear();

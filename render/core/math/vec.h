@@ -1,4 +1,5 @@
-#pragma once
+#ifndef KRENDER_VEC_H
+#define KRENDER_VEC_H
 #include <cmath>
 //#include <cstdarg>
 #include "matrix.h"
@@ -123,3 +124,5 @@ namespace krender {
 		}
 	}//namespace math
 }//namespace krender
+
+#endif

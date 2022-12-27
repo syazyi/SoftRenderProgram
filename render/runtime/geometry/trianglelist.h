@@ -1,4 +1,5 @@
-#pragma once
+#ifndef KRENDER_TRIANGLELIST_H
+#define KRENDER_TRIANGLELIST_H
 #include<vector>
 #include "triangle.h"
 
@@ -11,3 +12,4 @@ namespace krender {
         void AddTriangle(Triangle* triangle);
     };
 }
+#endif

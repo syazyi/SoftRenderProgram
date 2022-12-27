@@ -1,11 +1,15 @@
 #include "trianglestrategy.h"
 
 void krender::TriangleStrategy::Draw(VertexDataSet& vertexlist, VertexDataSet& viewvertex, FrameBuffer* pframebuffer, Shader* shader){
-    //ÕâÀï½ö½öÖ»»æÖÆÁËÒ»¸öÈý½ÇÐÎ£¬Òò´Ë»¹Òª¿¼ÂÇ¶àÈý½ÇÐÎµÄÇé¿ö¡£
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î£ï¿½ï¿½ï¿½Ë»ï¿½Òªï¿½ï¿½ï¿½Ç¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     for (int k = 0; k < vertexlist.triangleNums * 2; k += 3) {
         math::Vec4f vertex1 = vertexlist.vertex[vertexlist.vertex_index[k] - 1].position;
         math::Vec4f vertex2 = vertexlist.vertex[vertexlist.vertex_index[k + 1] - 1].position;
         math::Vec4f vertex3 = vertexlist.vertex[vertexlist.vertex_index[k + 2] - 1].position;
+
+        auto verView1 = vertexlist.vertex[vertexlist.vertex_index[k] - 1];
+        auto verView2 = vertexlist.vertex[vertexlist.vertex_index[k + 1] - 1];
+        auto verView3 = vertexlist.vertex[vertexlist.vertex_index[k + 2] - 1];
 
         int upper = std::max(vertex1.y, std::max(vertex2.y, vertex3.y));
         int bottom = std::min(vertex1.y, std::min(vertex2.y, vertex3.y));
@@ -13,12 +17,13 @@ void krender::TriangleStrategy::Draw(VertexDataSet& vertexlist, VertexDataSet& v
         int left = std::min(vertex1.x, std::min(vertex2.x, vertex3.x));
         for (int i = bottom; i <= upper; i++) {
             for (int j = left; j <= right; j++) {
-                   float x = j + 0.5;
-                   float y = i + 0.5;
+                    float x = j + 0.5;
+                    float y = i + 0.5;
                    
-                   std::array<math::Vec4f, 3> triangle = {vertex1, vertex2, vertex3};
-                   if (InsideTriangle(x, y, triangle)) {
-                       math::ColorVec4 color = shader->FragmentShader(vertexlist, viewvertex);
+                    std::array<math::Vec4f, 3> triangle = {vertex1, vertex2, vertex3};
+                    std::array<VertexData, 3> triangleView = {verView1, verView2, verView3};
+                if (InsideTriangle(x, y, triangle)) {
+                       math::ColorVec4 color = shader->FragmentShader(vertexlist, viewvertex, InterpolationColor(x, y, triangleView));
                        pframebuffer->FrameBufferSetPixel(x, y, color);
                    }
                 /*math::ColorVec4 color;
@@ -46,12 +51,29 @@ bool krender::TriangleStrategy::InsideTriangle(float x, float y, std::array<math
     math::Vec3f d = (math::Vec4f(x, y, 0) - triangle[0]).ToVec3();
     math::Vec3f e = (math::Vec4f(x, y, 0) - triangle[1]).ToVec3();
     math::Vec3f f = (math::Vec4f(x, y, 0) - triangle[2]).ToVec3();
-    return (Cross(a, d).z < 0 && Cross(b, e).z < 0 && Cross(c, f).z < 0);
+    auto adz = Cross(a, d).z;
+    auto bez = Cross(b, e).z;
+    auto cfz = Cross(c, f).z;
+    return (( adz < 0 && bez < 0 && cfz < 0) || ( adz > 0 && bez > 0 && cfz > 0));
 }
 
-std::pair<float, float> krender::TriangleStrategy::Interpolation(const VertexDataSet& vertexlist, const math::Vec3f& point){
-    float alpha = 0;
-    float beta = 1;
-    math::Vec3f a;
-    return std::pair<float, float>(alpha, beta);
+krender::math::ColorVec4 krender::TriangleStrategy::InterpolationColor(float x, float y, const std::array<VertexData, 3>& triangle){
+    math::Vec3f a = triangle[0].position.ToVec3();
+    math::Vec3f b = triangle[1].position.ToVec3();
+    math::Vec3f c = triangle[2].position.ToVec3();
+
+    float alpha = (-(x - b.x) * (c.y - b.y) + (y - b.y) * (c.x - b.x)) / (-(a.x - b.x) * (c.y - b.y) + (a.y - b.y) * (c.x - b.x));
+    float beta = (-(x - c.x) * (a.y - c.y) + (y - c.y) * (a.x - c.x)) / (-(b.x - c.x) * (a.y - c.y) + (b.y - c.y) * (a.x - c.x));
+    float gamma = 1 - alpha - beta;
+
+
+    auto colorX = clampColor(alpha * triangle[0].color.x + beta * triangle[1].color.x + gamma * triangle[2].color.x);
+    auto colorY = clampColor(alpha * triangle[0].color.y + beta * triangle[1].color.y + gamma * triangle[2].color.y);
+    auto colorZ = clampColor(alpha * triangle[0].color.z + beta * triangle[1].color.z + gamma * triangle[2].color.z);
+    auto colorA = clampColor(alpha * triangle[0].color.w + beta * triangle[1].color.w + gamma * triangle[2].color.w);
+
+ 
+    return math::ColorVec4((unsigned char)colorX, (unsigned char)colorY, (unsigned char)colorZ, (unsigned char)colorA);
+    //math::Vec3f a;
+    
 }

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef KRENDER_VEC2_H
+#define KRENDER_VEC2_H
 #include "vec.h"
 namespace krender{
     namespace math{
@@ -65,3 +66,5 @@ namespace krender{
         using Vec2ui = Matrix<unsigned char, 2, 1>; 
     }
 }
+
+#endif

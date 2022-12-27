@@ -1,4 +1,5 @@
-#pragma once
+#ifndef KRENDER_PIPELINE_H
+#define KRENDER_PIPELINE_H
 #include<memory>
 #include "framebuffer.h"
 #include "triangle.h"
@@ -10,7 +11,7 @@
 namespace krender{
     class Pipeline{
     public:
-        explicit Pipeline(std::shared_ptr<FrameBuffer>& pframebuffer,  Shader* pshader, VertexDataSet* vertexdata, RasterizeStrategy* rastertemp);
+        explicit Pipeline(std::shared_ptr<FrameBuffer>& pframebuffer, VertexDataSet* vertexdata, Shader* pshader, RasterizeStrategy* rastertemp);
         Pipeline(Pipeline const&) = delete;
 
         void Rendering();
@@ -27,3 +28,4 @@ namespace krender{
         RasterizeStrategy* rasterize;
     };
 }
+#endif

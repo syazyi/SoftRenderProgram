@@ -1,4 +1,5 @@
-#pragma once
+#ifndef KRENDER_VEC3_H
+#define KRENDER_VEC3_H
 #include"vec.h"
 namespace krender {
 	namespace math {
@@ -86,3 +87,4 @@ namespace krender {
 	
 }
 
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef KRENDER_VERTEX_H
+#define KRENDER_VERTEX_H
 #include <vector>
 #include "vertexdata.h"
 //Abolition case
@@ -15,3 +16,4 @@ namespace krender{
         void setTriangleNums();
     };
 }
+#endif

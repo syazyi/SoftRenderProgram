@@ -11,10 +11,12 @@ set(RUNTIME_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/runtime")
 set(CORE_MATH_DIRECTORY "${CORE_DIRECTORY}/math")
 set(RUNTIME_GEOMETRY_DIRECTORY "${RUNTIME_DIRECTORY}/geometry")
 set(RUNTIME_SHADER_DIRECTORY "${RUNTIME_DIRECTORY}/shader")
+set(CORE_UTILITY_DIRECTORY "${CORE_DIRECTORY}/utility")
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CORE_DIRECTORY}
                             PUBLIC ${CORE_MATH_DIRECTORY}
                             PUBLIC ${RUNTIME_DIRECTORY}
                             PUBLIC ${RUNTIME_GEOMETRY_DIRECTORY}
                             PUBLIC ${RUNTIME_SHADER_DIRECTORY}
+                            PUBLIC ${CORE_UTILITY_DIRECTORY}
                                             )

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef KRENDER_VERTEXDATA_H
+#define KRENDER_VERTEXDATA_H
 #include "vec4.h"
 namespace krender{
     class VertexData{
@@ -17,3 +18,4 @@ namespace krender{
         
     };
 }
+#endif

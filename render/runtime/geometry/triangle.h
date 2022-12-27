@@ -1,4 +1,5 @@
-#pragma once
+#ifndef KRENDER_TRIANGLE_H
+#define KRENDER_TRIANGLE_H
 #include <array>
 #include "vertexdata.h"
 namespace krender
@@ -11,3 +12,4 @@ namespace krender
         Triangle(VertexData const& a, VertexData const& b, VertexData const& c);
     };
 } // namespace krender
+#endif

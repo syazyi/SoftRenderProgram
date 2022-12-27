@@ -1,4 +1,5 @@
-#pragma once
+#ifndef KRENDER_VEC4_H
+#define KRENDER_VEC4_H
 #include"vec.h"
 #include"mat4x4.h"
 namespace krender
@@ -13,7 +14,7 @@ namespace krender
 			value_type x = 0;
 			value_type y = 0;
 			value_type z = 0;
-			value_type w = 1;
+			value_type w = 0;
 		public:
 			Matrix<T, 4, 1>() = default;
 			Matrix<T, 4, 1>(value_type const& px, value_type const& py, value_type const& pz, value_type const& pw = 1) : x(px), y(py), z(pz), w(pw){}
@@ -23,7 +24,7 @@ namespace krender
 				Matrix<T, 4, 1> temp_Matrix;
 				for(int i = 0; i < 4; i++){
 					for(int j = 0; j < 4; j++){
-						temp_Matrix[i] += rhs[i][j] * this->operator[](j);
+						temp_Matrix[i] += this->operator[](j) * rhs[i][j];
 					}
 				}
 				*this = temp_Matrix;
@@ -111,6 +112,7 @@ namespace krender
 			}
 		};
 		
+
 		using Vec4uc = Matrix<unsigned char, 4, 1>;
 		using Vec4f = Matrix<float, 4, 1>;
 		using Vec4d = Matrix<double, 4, 1>;
@@ -119,3 +121,5 @@ namespace krender
 		using ColorVec4 = Vec4uc;
 	} // namespace math
 } // namespace krender
+
+#endif

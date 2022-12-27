@@ -1,4 +1,5 @@
-#pragma once
+#ifndef KRENDER_WINDOWS_SYSTEM_H
+#define KRENDER_WINDOWS_SYSTEM_H
 #include"glad/glad.h"
 #include"glfw/glfw3.h"
 namespace krender
@@ -26,3 +27,4 @@ namespace krender
         static int getWindowHeight();
     };
 } // namespace krender
+#endif

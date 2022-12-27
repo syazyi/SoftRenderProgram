@@ -1,4 +1,5 @@
-#pragma once
+#ifndef KRENDER_FRAMEBUFFER_H
+#define KRENDER_FRAMEBUFFER_H
 #include<vector>
 #include"vec4.h"
 namespace krender {
@@ -16,3 +17,4 @@ namespace krender {
 		void FrameBufferClear();
 	};
 }
+#endif

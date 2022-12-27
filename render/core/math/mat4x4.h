@@ -1,5 +1,7 @@
-#pragma once
+#ifndef KRENDER_MAT4X4_H
+#define KRENDER_MAT4X4_H
 #include"matrix.h"
+
 namespace krender {
 	namespace math {
 		template<typename T>
@@ -45,6 +47,31 @@ namespace krender {
 				return *this;
 			}
 
+			Matrix<T, 4, 4>& Inverse(){
+				Matrix<T, 4, 4> temp(1.f);
+				for (size_t j = 0; j < 4; j++)
+				{
+					auto [mijMax, mijMaxRow] = GetMaxValueColForInverse(j);
+					assert(mijMax != 0);
+					if (mijMaxRow != j) {
+						EleRowOpChangeRow(*this, j, mijMaxRow);
+						//make same change
+						EleRowOpChangeRow(temp, j, mijMaxRow);
+					}
+					EleRowOpMulScalar(*this, j, 1.0f / mijMax);
+					EleRowOpMulScalar(temp, j, 1.0f / mijMax);
+					for (int r = 0; r < 4; r++) {
+						if (r != j) {
+							T mrj = this->operator[](r)[j];
+							EleRowOpAddRow(*this, j, -mrj, r);
+							EleRowOpAddRow(temp, j, -mrj, r);
+						}
+					}
+				}
+				AssignmentMatrix(temp, *this);
+				return *this;
+			}
+
 			void MatClear() {
 				for(int i = 0; i < 4; i++)
 					for(int j = 0; j < 4; j++){
@@ -59,7 +86,22 @@ namespace krender {
 				// row[3][0] = 0; row[3][1] = 0; row[3][2] = 0; row[3][3] = 1;
 			}
 
-
+		private:
+			auto GetMaxValueColForInverse(int col) {
+				T max = 0;
+				int maxRow = 0;
+				T absMax = 0;
+				for (int i = col; i < 4; i++) {
+					auto value = this->operator[](i)[col];
+					auto absValue = abs(value);
+					if (absMax < absValue) {
+						absMax = absValue;
+						max = value;
+						maxRow = i;
+					}
+				}
+				return std::make_pair(max, maxRow);
+			}
 		};
 		template<typename T, int rowSize, int colSize>
 		Matrix<T, rowSize, 1> operator*(Matrix<T, rowSize, colSize> const& lhs, Matrix<T, colSize, 1> const& rhs){
@@ -84,7 +126,12 @@ namespace krender {
 			}
 			return temp_Matrix;
 		} 
+		
 		using mat4 = Matrix<float, 4, 4>;
+
 	}
 	
 }
+
+
+#endif

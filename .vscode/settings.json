@@ -1,0 +1,33 @@
+{
+    "files.associations": {
+        "chrono": "cpp",
+        "tuple": "cpp",
+        "utility": "cpp",
+        "xutility": "cpp",
+        "array": "cpp",
+        "atomic": "cpp",
+        "bit": "cpp",
+        "cmath": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "cstddef": "cpp",
+        "cstdint": "cpp",
+        "cstdio": "cpp",
+        "cstdlib": "cpp",
+        "cstring": "cpp",
+        "ctime": "cpp",
+        "cwchar": "cpp",
+        "exception": "cpp",
+        "initializer_list": "cpp",
+        "iosfwd": "cpp",
+        "limits": "cpp",
+        "memory": "cpp",
+        "new": "cpp",
+        "type_traits": "cpp",
+        "typeinfo": "cpp",
+        "vector": "cpp",
+        "xmemory": "cpp",
+        "xstddef": "cpp",
+        "xtr1common": "cpp"
+    }
+}

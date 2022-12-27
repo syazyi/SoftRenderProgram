@@ -1,12 +1,15 @@
 #include "pipeline.h"
+#include "window_system.h"
+ krender::Pipeline::Pipeline(std::shared_ptr<FrameBuffer>& pframebuffer, VertexDataSet* vertexdata, Shader* pshader, RasterizeStrategy* rastertemp) : 
+     framebuffer(pframebuffer), vertexlist(vertexdata), shader(pshader), rasterize(rastertemp) {}
 
- krender::Pipeline::Pipeline(std::shared_ptr<FrameBuffer>& pframebuffer, Shader* pshader, VertexDataSet* vertexdata, RasterizeStrategy* rastertemp) : framebuffer(pframebuffer), shader(pshader), vertexlist(vertexdata), rasterize(rastertemp) {
-}
 void krender::Pipeline::Rendering() {
     //对每个三角形操作，粒度不够细，还需要完成画线操作，如果我只是想画线，两个顶点之间连一条线，而未链接的顶点不划线。似乎可以使用链表维护三角形顶点。
     //obj文件中是哪几个顶点组成一个三角形。将顶点全部列出，通过三角中的索引（三角形中存索引？）访问顶点，再那这些顶点计算，这样就是使用现成的数据了。
     //使用顶点数组而不是三角形，使用顶点索引访问三角形。不同对顶点索引的解释方式可以设置不同的图形，比如三角形，四边形，以及线等。
     VertexDataSet* tempvertex = new VertexDataSet(*vertexlist);
+
+    //由于矩阵的乘法结合律，可以先将总体矩阵计算出来再计算最终顶点位置。这一个阶段可以叫做几何阶段。
     shader->VertexShader(*tempvertex);
     VertexDataSet view_pos = *tempvertex;
     Project(*tempvertex);
@@ -19,7 +22,18 @@ void krender::Pipeline::Rendering() {
     delete tempvertex;
 }
 void krender::Pipeline::Project(VertexDataSet& pvertexlist) {
-    math::mat4 projectionmat(1.0f);
+    float r = 1.f * ((float)framebuffer->width_ / (float)framebuffer->height_);
+    float l = -r;
+    float t = 1.f;
+    float b = -t;
+    float n = -1.f;
+    float f = 1.f;
+    math::mat4 projectionmat(
+        2.f / (r - l), 0, 0, (r + l) / (l - r),
+         0, 2 / (t - b), 0, (t + b) / (b - t),
+        0, 0, 2 / (n - f), (f + n) / (n - f), 
+        0, 0, 0, 1
+        );
     for (auto& a : pvertexlist.vertex) {
         a.position *= projectionmat;
     }
