@@ -11,18 +11,18 @@
 namespace krender{
     class Pipeline{
     public:
-        explicit Pipeline(std::shared_ptr<FrameBuffer>& pframebuffer, VertexDataSet* vertexdata, Shader* pshader, RasterizeStrategy* rastertemp);
+        explicit Pipeline(FrameBuffer* pframebuffer, VertexDataSet* vertexdata, Shader* pshader, RasterizeStrategy* rastertemp);
         Pipeline(Pipeline const&) = delete;
 
         void Rendering();
         void Project(VertexDataSet& pvertexlist);
         void Clip(VertexDataSet& pvertexlist);
         void ScreenMapping(VertexDataSet& pvertexlist);
-        void setFramebuffer(std::shared_ptr<FrameBuffer>& pframebuffer);
+        void setFramebuffer(FrameBuffer* pframebuffer);
         void PipelineClear();
         ~Pipeline();
     private:
-        std::shared_ptr<FrameBuffer> framebuffer;
+        FrameBuffer* framebuffer;
         VertexDataSet* vertexlist;
         Shader* shader;
         RasterizeStrategy* rasterize;

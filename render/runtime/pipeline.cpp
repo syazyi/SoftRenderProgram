@@ -1,6 +1,6 @@
 #include "pipeline.h"
 #include "window_system.h"
- krender::Pipeline::Pipeline(std::shared_ptr<FrameBuffer>& pframebuffer, VertexDataSet* vertexdata, Shader* pshader, RasterizeStrategy* rastertemp) : 
+ krender::Pipeline::Pipeline(FrameBuffer* pframebuffer, VertexDataSet* vertexdata, Shader* pshader, RasterizeStrategy* rastertemp) : 
      framebuffer(pframebuffer), vertexlist(vertexdata), shader(pshader), rasterize(rastertemp) {}
 
 void krender::Pipeline::Rendering() {
@@ -17,7 +17,7 @@ void krender::Pipeline::Rendering() {
     ScreenMapping(*tempvertex);
     //对三角形进行画边（或画点）而不是画三角形，需要修改顶点着色器的实现，当然可以使用不同的实现去画线，这里可能要用到策略模式。该函数接口可能因为这个原因需要变化。
     
-    rasterize->Draw(*tempvertex, view_pos, framebuffer.get(), shader);
+    rasterize->Draw(*tempvertex, view_pos, framebuffer, shader);
     // shader->FragmentShader(*tempvertex, view_pos, framebuffer);
     delete tempvertex;
 }
@@ -60,7 +60,7 @@ void krender::Pipeline::ScreenMapping(VertexDataSet& pvertexlist) {
 }
 
 
-void krender::Pipeline::setFramebuffer(std::shared_ptr<FrameBuffer>& pframebuffer) {
+void krender::Pipeline::setFramebuffer(FrameBuffer* pframebuffer) {
     framebuffer = pframebuffer;
 }
 

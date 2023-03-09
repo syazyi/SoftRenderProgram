@@ -22,6 +22,7 @@ namespace krender{
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
             return WINDOW_ERROR_CODE::GLAD_ERROR;
         }
+
         return WINDOW_ERROR_CODE::NO_ERROR;
     }
 

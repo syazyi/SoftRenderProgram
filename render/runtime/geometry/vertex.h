@@ -14,6 +14,8 @@ namespace krender{
         void AddVertex(VertexData& vertexdata);
         void AddIndex(uint32_t pindex);
         void setTriangleNums();
+
+        void LoadObj();
     };
 }
 #endif

@@ -1,8 +1,21 @@
 #include "trianglestrategy.h"
 
+auto krender::TriangleStrategy::interpolation(float x, float y, const std::array<VertexData, 3>& triangle)
+{
+    math::Vec3f a = triangle[0].position.ToVec3();
+    math::Vec3f b = triangle[1].position.ToVec3();
+    math::Vec3f c = triangle[2].position.ToVec3();
+
+    float alpha = (-(x - b.x) * (c.y - b.y) + (y - b.y) * (c.x - b.x)) / (-(a.x - b.x) * (c.y - b.y) + (a.y - b.y) * (c.x - b.x));
+    float beta = (-(x - c.x) * (a.y - c.y) + (y - c.y) * (a.x - c.x)) / (-(b.x - c.x) * (a.y - c.y) + (b.y - c.y) * (a.x - c.x));
+    float gamma = 1 - alpha - beta;
+
+    return std::make_tuple(alpha, beta, gamma);
+}
+
 void krender::TriangleStrategy::Draw(VertexDataSet& vertexlist, VertexDataSet& viewvertex, FrameBuffer* pframebuffer, Shader* shader){
-    //�������ֻ������һ�������Σ���˻�Ҫ���Ƕ������ε������
-    for (int k = 0; k < vertexlist.triangleNums * 2; k += 3) {
+    
+    for (int k = 0; k < vertexlist.triangleNums * 3; k += 3) {
         math::Vec4f vertex1 = vertexlist.vertex[vertexlist.vertex_index[k] - 1].position;
         math::Vec4f vertex2 = vertexlist.vertex[vertexlist.vertex_index[k + 1] - 1].position;
         math::Vec4f vertex3 = vertexlist.vertex[vertexlist.vertex_index[k + 2] - 1].position;
@@ -23,9 +36,16 @@ void krender::TriangleStrategy::Draw(VertexDataSet& vertexlist, VertexDataSet& v
                     std::array<math::Vec4f, 3> triangle = {vertex1, vertex2, vertex3};
                     std::array<VertexData, 3> triangleView = {verView1, verView2, verView3};
                 if (InsideTriangle(x, y, triangle)) {
-                       math::ColorVec4 color = shader->FragmentShader(vertexlist, viewvertex, InterpolationColor(x, y, triangleView));
-                       pframebuffer->FrameBufferSetPixel(x, y, color);
-                   }
+                    auto [alpha, beta, gamma] = interpolation(x, y, triangleView);
+                    float zValue = InterpolationZBuffer(alpha, beta, gamma, triangleView);
+                    
+                    if (pframebuffer->FrameBufferCompareZBuffer(x, y, zValue)) {
+                        //Pass the z-test
+                        pframebuffer->FrameBufferSetZBuffer(x, y, zValue);
+                        math::ColorVec4 color = shader->FragmentShader(vertexlist, viewvertex, InterpolationColor(alpha, beta, gamma, triangleView));
+                        pframebuffer->FrameBufferSetPixel(x, y, color);
+                    }
+                }
                 /*math::ColorVec4 color;
                 std::array<math::Vec4f, 3> triangle = { vertex1, vertex2, vertex3 };
                 float msaaWeight[2] = { 0.25, 0.75 };
@@ -58,14 +78,7 @@ bool krender::TriangleStrategy::InsideTriangle(float x, float y, std::array<math
 }
 
 krender::math::ColorVec4 krender::TriangleStrategy::InterpolationColor(float x, float y, const std::array<VertexData, 3>& triangle){
-    math::Vec3f a = triangle[0].position.ToVec3();
-    math::Vec3f b = triangle[1].position.ToVec3();
-    math::Vec3f c = triangle[2].position.ToVec3();
-
-    float alpha = (-(x - b.x) * (c.y - b.y) + (y - b.y) * (c.x - b.x)) / (-(a.x - b.x) * (c.y - b.y) + (a.y - b.y) * (c.x - b.x));
-    float beta = (-(x - c.x) * (a.y - c.y) + (y - c.y) * (a.x - c.x)) / (-(b.x - c.x) * (a.y - c.y) + (b.y - c.y) * (a.x - c.x));
-    float gamma = 1 - alpha - beta;
-
+    auto [alpha, beta, gamma] = krender::TriangleStrategy::interpolation(x, y, triangle);
 
     auto colorX = clampColor(alpha * triangle[0].color.x + beta * triangle[1].color.x + gamma * triangle[2].color.x);
     auto colorY = clampColor(alpha * triangle[0].color.y + beta * triangle[1].color.y + gamma * triangle[2].color.y);
@@ -77,3 +90,32 @@ krender::math::ColorVec4 krender::TriangleStrategy::InterpolationColor(float x, 
     //math::Vec3f a;
     
 }
+
+krender::math::ColorVec4 krender::TriangleStrategy::InterpolationColor(float alpha, float beta, float gamma, const std::array<VertexData, 3>& triangle)
+{
+    auto colorX = clampColor(alpha * triangle[0].color.x + beta * triangle[1].color.x + gamma * triangle[2].color.x);
+    auto colorY = clampColor(alpha * triangle[0].color.y + beta * triangle[1].color.y + gamma * triangle[2].color.y);
+    auto colorZ = clampColor(alpha * triangle[0].color.z + beta * triangle[1].color.z + gamma * triangle[2].color.z);
+    auto colorA = clampColor(alpha * triangle[0].color.w + beta * triangle[1].color.w + gamma * triangle[2].color.w);
+
+
+    return math::ColorVec4((unsigned char)colorX, (unsigned char)colorY, (unsigned char)colorZ, (unsigned char)colorA);
+}
+
+float krender::TriangleStrategy::InterpolationZBuffer(float x, float y, const std::array<VertexData, 3>& triangle)
+{
+    auto [alpha, beta, gamma] = interpolation(x, y, triangle);
+
+    float zBufferValue = alpha * triangle[0].position.z + beta * triangle[1].position.z + gamma * triangle[2].position.z;
+
+    return zBufferValue;
+}
+
+float krender::TriangleStrategy::InterpolationZBuffer(float alpha, float beta, float gamma, const std::array<VertexData, 3>& triangle)
+{
+    float zBufferValue = alpha * triangle[0].position.z + beta * triangle[1].position.z + gamma * triangle[2].position.z;
+
+    return zBufferValue;
+}
+
+

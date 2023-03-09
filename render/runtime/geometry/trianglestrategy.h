@@ -14,6 +14,10 @@ namespace krender
         bool InsideTriangle(float x, float y, std::array<math::Vec4f, 3> triangle);
         
         math::ColorVec4 InterpolationColor(float x, float y, const std::array<VertexData, 3>& triangle);
+        math::ColorVec4 InterpolationColor(float alpha, float beta, float gamma, const std::array<VertexData, 3>& triangle);
+        float InterpolationZBuffer(float x, float y, const std::array<VertexData, 3>& triangle);
+        float InterpolationZBuffer(float alpha, float beta, float gamma, const std::array<VertexData, 3>& triangle);
+
         float clampColor(float a){
             if(a > 255.f){
                 return 255.f;
@@ -23,6 +27,8 @@ namespace krender
             }
             return a;
         }
+    public:
+        auto interpolation(float x, float y, const std::array<VertexData, 3>& triangle);
     };
 } // namespace krender
 #endif
