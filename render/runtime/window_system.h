@@ -2,8 +2,11 @@
 #define KRENDER_WINDOWS_SYSTEM_H
 #include"glad/glad.h"
 #include"glfw/glfw3.h"
+
+
 namespace krender
 {
+    class Camera;   
     enum class WINDOW_ERROR_CODE{
         WINDOW_CREATE_ERROR,
         GLAD_ERROR,
@@ -12,8 +15,9 @@ namespace krender
     class window_system
     {
     private:
-        static constexpr int kWindowWidth = 1600;
-        static constexpr int kWindowHeight = 900;
+        static constexpr int kWindowWidth = 800;
+        static constexpr int kWindowHeight = 600;
+    public:
         GLFWwindow* window;
     public:
         window_system();
@@ -22,8 +26,9 @@ namespace krender
         bool shouldClose();
         double getCurrentTime();
         void windowSwapBuffer();
-        void ProcessInput(float& eyePosRight, float& eyeForward, float& eyeUp);
+        void ProcessInput(Camera& camera);
         void pollEvent();
+        
         static int getWindowWidth();
         static int getWindowHeight();
     };

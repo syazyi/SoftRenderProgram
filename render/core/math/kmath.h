@@ -23,6 +23,9 @@ namespace krender
             return rotation_mat;
         }
 
+        static float Radians(float degrees) {
+            return degrees * static_cast<float>(0.01745329251994329576923690768489);
+        }
 
     } // namespace math
     

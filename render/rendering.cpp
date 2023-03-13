@@ -12,28 +12,45 @@
 #include"framebuffer.h"
 #include "trianglestrategy.h"
 #include "timer.h"
+#include "Camera/camera.h"
 
 using namespace krender::math;
 
-//get lookat matrix
-mat4 LookAt(Vec3f eyePos, Vec3f atPos, Vec3f UpVector){
-	Vec3f zCamera = (atPos - eyePos).Normalize();
-	
-	Vec3f xCamera = Cross(zCamera, UpVector).Normalize();
-	Vec3f yCamera = Cross(xCamera, zCamera).Normalize();
+std::unique_ptr<krender::Camera> camera = std::make_unique<krender::Camera>(Vec3f(0, 0, 1), Vec3f(0, 0, -1), Vec3f(0, 1, 0));
 
-	mat4 View = mat4(
-		xCamera.x, xCamera.y, xCamera.z, 0,
-		yCamera.x, yCamera.y, yCamera.z, 0,
-		-zCamera.x, -zCamera.y, -zCamera.z, 0,
-		0, 0, 0, 1
-	) *= mat4(
-		1, 0, 0, -eyePos.x,
-		0, 1, 0, -eyePos.y,
-		0, 0, 1, -eyePos.z,
-		0, 0, 0, 1
-	);
-	return View;
+double lastX = 1600 / 2;
+double lastY = 800 / 2;
+double pitch = 0.0;
+double yaw = -90.0;
+
+float lastTime = 0.0f;
+float deltaTime;
+void mouse_callback(GLFWwindow* window, double xPos, double yPos)
+{
+	double xOffset = xPos - lastX;
+	double yOffset = lastY - yPos;
+	lastX = xPos;
+	lastY = yPos;
+
+	double sensitivity = 0.05;
+
+	pitch += yOffset * sensitivity;
+	yaw += xOffset * sensitivity;
+
+	if (pitch >= 89.0 && pitch <= -89.0)
+	{
+		pitch = 89.0;
+	}
+	if (yaw >= 89.0 && yaw <= -89.0)
+	{
+		yaw = 89.0;
+	}
+	Vec3f front;
+	front.x = cos(Radians(pitch)) * cos(Radians(yaw));
+	front.y = sin(Radians(pitch));
+	front.z = cos(Radians(pitch)) * sin(Radians(yaw));
+	camera->setFront(front.Normalize());
+	
 }
 
 int main(){
@@ -44,8 +61,6 @@ int main(){
 	}
 
 	std::unique_ptr<krender::FrameBuffer> colorbuffer = std::make_unique<krender::FrameBuffer>(krender::window_system::getWindowWidth(), krender::window_system::getWindowHeight());
-	//std::shared_ptr<krender::FrameBuffer> colorbufferSecond = std::make_shared<krender::FrameBuffer>(kWindowWeight, kWindowHeight);
-
 
 	Vec3f a(0.0f, 0.5f, 0);
 	Vec3f b(0.5f, 0.0f, 0);
@@ -114,16 +129,18 @@ int main(){
 
 	std::unique_ptr<krender::Pipeline> pipeline = std::make_unique<krender::Pipeline>(colorbuffer.get(), vertexdata_set.get(), simpleshader.get(), raster.get());
 	
+	glfwSetCursorPosCallback(window->window, &mouse_callback);
+	glfwSetInputMode(window->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	//Test
 	krender::Timer timer;
-	float CameraRight = 0;
-	float CameraForward = 10;
-	float CameraUp = 0;
 	while (!window->shouldClose()) {
 		
 		timer.CaculateDeltaTime();
-		window->ProcessInput(CameraRight, CameraForward, CameraUp);
 		float time = window->getCurrentTime();
+		deltaTime = time - lastTime;
+		lastTime = time;
+		camera->setSpeed(deltaTime);
+		window->ProcessInput(*camera);
 		float angle = time *  3.14159f / 180.f * 10.f;
 		krender::math::mat4 rotate_model_x(cos(angle), -sin(angle), 0, 0,
 								  sin(angle),  cos(angle), 0, 0,
@@ -141,12 +158,9 @@ int main(){
 									   0, 1, 0, 0.0f,
 									   0, 0, 1, 0,
 									   0, 0, 0, 1);
-		simpleshader->SetModel(rotate_model_y*=rotate_model_x *=move_model);
+		simpleshader->SetModel(move_model);
 		
-		krender::math::Vec3f eye(CameraRight, CameraUp, 1 - CameraForward);
-		krender::math::Vec3f up(0, 1, 0);
-		Vec3f lookat(0, 0, -1);
-		simpleshader->SetView(LookAt(eye, eye + lookat, up));
+		simpleshader->SetView(camera->GetLookAt());
 
 		pipeline->PipelineClear();
 

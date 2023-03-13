@@ -1,4 +1,5 @@
 #include "window_system.h"
+#include "Camera/camera.h"
 
 namespace krender {
 
@@ -35,25 +36,19 @@ namespace krender {
         glfwSwapBuffers(window);
     }
 
-    void window_system::ProcessInput(float& eyePosRight, float& eyeForward, float& eyeUp)
+    void window_system::ProcessInput(Camera& camera)
     {
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-            eyePosRight -= 0.1f;
+            camera.m_cameraPos -=  Cross(camera.m_cameraFront, camera.m_cameraUp).Normalize() * camera.m_speed; 
         }
         else if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
-            eyePosRight += 0.1f;
+            camera.m_cameraPos +=  Cross(camera.m_cameraFront, camera.m_cameraUp).Normalize() * camera.m_speed;
         }
-        /*else if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-            eyeForward += 0.1f;
+        else if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+            camera.m_cameraPos += camera.m_cameraFront * camera.m_speed;
         }
         else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-            eyeForward -= 0.1f;
-        }*/
-        else if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-            eyeUp += 0.1f;
-        }
-        else if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
-            eyeUp -= 0.1f;
+            camera.m_cameraPos -= camera.m_cameraFront * camera.m_speed;
         }
     }
 

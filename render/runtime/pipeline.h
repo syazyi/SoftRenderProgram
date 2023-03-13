@@ -9,13 +9,19 @@
 #include "rasterizestrategy.h"
 
 namespace krender{
+
+    enum class EProjectType {
+        Orthogonal,
+        Perspective
+    };
+
     class Pipeline{
     public:
         explicit Pipeline(FrameBuffer* pframebuffer, VertexDataSet* vertexdata, Shader* pshader, RasterizeStrategy* rastertemp);
         Pipeline(Pipeline const&) = delete;
 
         void Rendering();
-        void Project(VertexDataSet& pvertexlist);
+        void Project(VertexDataSet& pvertexlist, EProjectType type);
         void Clip(VertexDataSet& pvertexlist);
         void ScreenMapping(VertexDataSet& pvertexlist);
         void setFramebuffer(FrameBuffer* pframebuffer);

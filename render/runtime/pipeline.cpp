@@ -12,7 +12,7 @@ void krender::Pipeline::Rendering() {
     //由于矩阵的乘法结合律，可以先将总体矩阵计算出来再计算最终顶点位置。这一个阶段可以叫做几何阶段。
     shader->VertexShader(*tempvertex);
     VertexDataSet view_pos = *tempvertex;
-    Project(*tempvertex);
+    Project(*tempvertex, EProjectType::Perspective);
     Clip(*tempvertex);
     ScreenMapping(*tempvertex);
     //对三角形进行画边（或画点）而不是画三角形，需要修改顶点着色器的实现，当然可以使用不同的实现去画线，这里可能要用到策略模式。该函数接口可能因为这个原因需要变化。
@@ -21,19 +21,36 @@ void krender::Pipeline::Rendering() {
     // shader->FragmentShader(*tempvertex, view_pos, framebuffer);
     delete tempvertex;
 }
-void krender::Pipeline::Project(VertexDataSet& pvertexlist) {
-    float r = 1.f * ((float)framebuffer->width_ / (float)framebuffer->height_);
-    float l = -r;
-    float t = 1.f;
-    float b = -t;
-    float n = -1.f;
-    float f = 1.f;
-    math::mat4 projectionmat(
-        2.f / (r - l), 0, 0, (r + l) / (l - r),
-         0, 2 / (t - b), 0, (t + b) / (b - t),
-        0, 0, 2 / (n - f), (f + n) / (n - f), 
-        0, 0, 0, 1
+void krender::Pipeline::Project(VertexDataSet& pvertexlist, EProjectType type) {
+    math::mat4 projectionmat;
+    if (type == EProjectType::Orthogonal) {
+        float r = 1.f * ((float)framebuffer->width_ / (float)framebuffer->height_);
+        float l = -r;
+        float t = 1.f;
+        float b = -t;
+        float n = -1.f;
+        float f = 1.f;
+        projectionmat = math::mat4(
+            2.f / (r - l), 0, 0, (r + l) / (l - r),
+            0, 2 / (t - b), 0, (t + b) / (b - t),
+            0, 0, 2 / (n - f), (f + n) / (n - f),
+            0, 0, 0, 1
         );
+    }
+    else if (type == EProjectType::Perspective){
+        float fovy = math::Radians(45.0f);
+        float aspect = float(framebuffer->width_) / float(framebuffer->height_);
+        float n = 0.1f;
+        float f = 100.f;
+        float tanHalfFovy = tan(fovy / 2.0f);
+        projectionmat = math::mat4{
+            1.0f / (aspect * tanHalfFovy), 0, 0, 0,
+            0, 1.0f / (tanHalfFovy), 0, 0, 
+            0, 0, -(f + n) / (f - n), -2.f * f * n / (f - n), 
+            0, 0, -1, 0
+        };
+    }
+    
 
     for (auto& a : pvertexlist.vertex) {
         a.position *= projectionmat;
