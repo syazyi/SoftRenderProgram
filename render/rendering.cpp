@@ -1,5 +1,6 @@
 #include<vector>
 #include<memory>
+#include<iostream>
 
 #include "kmath.h"
 
@@ -13,6 +14,27 @@
 #include "timer.h"
 
 using namespace krender::math;
+
+//get lookat matrix
+mat4 LookAt(Vec3f eyePos, Vec3f atPos, Vec3f UpVector){
+	Vec3f zCamera = (atPos - eyePos).Normalize();
+	
+	Vec3f xCamera = Cross(zCamera, UpVector).Normalize();
+	Vec3f yCamera = Cross(xCamera, zCamera).Normalize();
+
+	mat4 View = mat4(
+		xCamera.x, xCamera.y, xCamera.z, 0,
+		yCamera.x, yCamera.y, yCamera.z, 0,
+		-zCamera.x, -zCamera.y, -zCamera.z, 0,
+		0, 0, 0, 1
+	) *= mat4(
+		1, 0, 0, -eyePos.x,
+		0, 1, 0, -eyePos.y,
+		0, 0, 1, -eyePos.z,
+		0, 0, 0, 1
+	);
+	return View;
+}
 
 int main(){
 	
@@ -94,10 +116,13 @@ int main(){
 	
 	//Test
 	krender::Timer timer;
-
+	float CameraRight = 0;
+	float CameraForward = 10;
+	float CameraUp = 0;
 	while (!window->shouldClose()) {
 		
 		timer.CaculateDeltaTime();
+		window->ProcessInput(CameraRight, CameraForward, CameraUp);
 		float time = window->getCurrentTime();
 		float angle = time *  3.14159f / 180.f * 10.f;
 		krender::math::mat4 rotate_model_x(cos(angle), -sin(angle), 0, 0,
@@ -116,15 +141,13 @@ int main(){
 									   0, 1, 0, 0.0f,
 									   0, 0, 1, 0,
 									   0, 0, 0, 1);
-		simpleshader->SetModel(move_back_model*=rotate_model_y*=rotate_model_x *=move_model);
-		krender::math::Vec3f lookat(0, 0, -1);
+		simpleshader->SetModel(rotate_model_y*=rotate_model_x *=move_model);
+		
+		krender::math::Vec3f eye(CameraRight, CameraUp, 1 - CameraForward);
 		krender::math::Vec3f up(0, 1, 0);
-		krender::math::Vec3f lux = Cross(lookat, up);
-		krender::math::mat4 viewmat4(lux.x, lux.y, lux.z, 0, 
-									 up.x, up.y, up.z, 0, 
-									 -lookat.x, -lookat.y, -lookat.z, 1.f,
-									 0, 0, 0, 1);
-		simpleshader->SetView(viewmat4);
+		Vec3f lookat(0, 0, -1);
+		simpleshader->SetView(LookAt(eye, eye + lookat, up));
+
 		pipeline->PipelineClear();
 
 		pipeline->Rendering();

@@ -34,6 +34,7 @@ void krender::Pipeline::Project(VertexDataSet& pvertexlist) {
         0, 0, 2 / (n - f), (f + n) / (n - f), 
         0, 0, 0, 1
         );
+
     for (auto& a : pvertexlist.vertex) {
         a.position *= projectionmat;
     }

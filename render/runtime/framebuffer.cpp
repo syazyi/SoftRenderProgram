@@ -42,6 +42,10 @@ void FrameBuffer::FrameBufferSetPixel(int x, int y, ColorVec4& color) {
 
 bool krender::FrameBuffer::FrameBufferCompareZBuffer(int x, int y, float z)
 {
+	if (x < 0 || x >= width_ || y < 0 || y >= height_) {
+		//Kaf.log("The parameter is out of range");
+		return false;
+	}
 	int index = x + y * width_;
 	float zBufferValue = z_buffer[index];
 	return zBufferValue > z ? true : false;

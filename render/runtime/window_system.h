@@ -22,9 +22,11 @@ namespace krender
         bool shouldClose();
         double getCurrentTime();
         void windowSwapBuffer();
+        void ProcessInput(float& eyePosRight, float& eyeForward, float& eyeUp);
         void pollEvent();
         static int getWindowWidth();
         static int getWindowHeight();
     };
+
 } // namespace krender
 #endif
